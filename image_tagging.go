@@ -2,6 +2,7 @@ package alchemyapi
 
 import (
 	"encoding/json"
+	"io"
 	"net/url"
 )
 
@@ -42,7 +43,31 @@ func (api *AlchemyAPI) URLGetRankedImageKeywords(imageURL string, forceShowAll b
 
 	var res URLGetRankedImageKeywordsResponse
 
-	b, err := api.connection.post("calls/url/URLGetRankedImageKeywords", params, api.c)
+	b, err := api.connection.post("calls/url/URLGetRankedImageKeywords", params, nil, api.c)
+	if err != nil {
+		return res, err
+	}
+
+	err = json.Unmarshal(b, &res)
+	return res, err
+}
+
+// ImageGetRankedImageKeywords return http://www.alchemyapi.com/api/image-tagging/image.html response
+func (api *AlchemyAPI) ImageGetRankedImageKeywords(postData io.Reader, forceShowAll bool, knowledgeGraph bool) (URLGetRankedImageKeywordsResponse, error) {
+	params := url.Values{}
+	params.Add("imagePostMode", "raw")
+
+	if forceShowAll {
+		params.Add("forceShowAll", "0")
+	}
+
+	if knowledgeGraph {
+		params.Add("knowledgeGraph", "0")
+	}
+
+	var res URLGetRankedImageKeywordsResponse
+
+	b, err := api.connection.post("calls/image/ImageGetRankedImageKeywords", params, postData, api.c)
 	if err != nil {
 		return res, err
 	}
